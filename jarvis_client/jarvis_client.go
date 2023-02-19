@@ -57,7 +57,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	sess, err := discordgo.New("Bot " + os.Getenv("GITHUB_BOT_TOKEN"))
+	sess, err := discordgo.New("Bot " + os.Getenv("GITHUB_CLIENT_TOKEN"))
 	if err != nil {
 		log.Fatal(err)
 	}
