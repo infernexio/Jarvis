@@ -1,0 +1,71 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"os/signal"
+	"strings"
+	"syscall"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
+)
+
+func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+
+	if strings.Contains(m.Content, "!") {
+		command := m.Content[1:]
+
+
+		cmd := exec.Command("/bin/bash", "-c", command)
+		out, err := cmd.Output()
+		if err != nil {
+			fmt.Println(err)
+		}
+	
+		s.ChannelMessageSend(m.ChannelID, string(out))
+	}
+}
+
+func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	sess, err := discordgo.New("Bot " + os.Getenv("GITHUB_BOT_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sess.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		if m.Author.ID == s.State.User.ID {
+			return
+		}
+
+		if m.Content == "ping" {
+			s.ChannelMessageSend(m.ChannelID, "pong")
+		}
+	})
+
+	sess.AddHandler(execute)
+
+	sess.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
+
+	err = sess.Open()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer sess.Close()
+	fmt.Print("Bot is running...")
+
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-sc
+}
