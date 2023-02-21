@@ -60,8 +60,17 @@ func setup() string {
 		fmt.Println(err)
 	}
 
-	if strings.Contains(string(out), "inet ") {
-		ip = string(out[strings.Index(string(out), "inet ")+5 : strings.Index(string(out), "netmask:")-1])
+	for {
+		if strings.Contains(string(out), "inet ") {
+			ip = string(out[strings.Index(string(out), "inet ")+5 : strings.Index(string(out), "netmask:")-1])
+			if(ip == "127.0.0.1"){
+				ip = ""
+				out = out[strings.Index(string(out), "inet") +1 :]
+			}else{
+				break;
+			}
+		}
+
 	}
 
 	file, err := os.Open("KernalKraken_config.txt")
