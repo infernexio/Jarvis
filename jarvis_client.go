@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -51,6 +52,38 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func setup() string {
+	ip, channelID := "", ""
+	cmd := exec.Command("/bin/bash", "-c", "ifconfig")
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if strings.Contains(string(out), "inet ") {
+		ip = string(out[strings.Index(string(out), "inet ")+5 : strings.Index(string(out), "netmask:")-1])
+	}
+
+	file, err := os.Open("KernalKraken_config.txt")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		if scanner.Text() == ip {
+			line := strings.Split(scanner.Text(), " ")
+			if len(line) > 1 {
+				channelID = line[2]
+			}
+		}
+	}
+
+	return channelID
+
+}
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -62,13 +95,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	channelID := setup()
+
 	sess.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
 			return
 		}
 
-		if m.Content == "ping" {
-			s.ChannelMessageSend(m.ChannelID, "pong")
+		if m.ChannelID == channelID {
+			if m.Content == "ping" {
+				s.ChannelMessageSend(m.ChannelID, "pong")
+			}
 		}
 	})
 

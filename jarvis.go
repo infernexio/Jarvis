@@ -64,7 +64,13 @@ func setup(s *discordgo.Session, m *discordgo.MessageCreate) {
 				s.ChannelMessageSend(m.ChannelID, "Please provide # of teams and all ip adress of teams with X, X being team number (ex 10.X.2.2)")
 				return
 			} else {
-				for i := 1; i < len(args); i++ {
+				teams, err := strconv.Atoi(args[0])
+				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, "Please provide a valid number of teams")
+					return
+				}
+
+				for i := 1; i <= teams; i++ {
 					CreateChannel(s, m.GuildID, strconv.Itoa(i), args[1:])
 				}
 			}
