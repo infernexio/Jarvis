@@ -57,22 +57,20 @@ func setup(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.ChannelID == "1076897679151476907" {
-		if strings.Split(m.Content, " ")[0] == "!setup" {
-			args := strings.Split(m.Content, " ")[1:]
-			if len(args) < 2 {
-				s.ChannelMessageSend(m.ChannelID, "Please provide # of teams and all ip adress of teams with X, X being team number (ex 10.X.2.2)")
+	if strings.Split(m.Content, " ")[0] == "!setup" {
+		args := strings.Split(m.Content, " ")[1:]
+		if len(args) < 2 {
+			s.ChannelMessageSend(m.ChannelID, "Please provide # of teams and all ip adress of teams with X, X being team number (ex 10.X.2.2)")
+			return
+		} else {
+			teams, err := strconv.Atoi(args[0])
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "Please provide a valid number of teams")
 				return
-			} else {
-				teams, err := strconv.Atoi(args[0])
-				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, "Please provide a valid number of teams")
-					return
-				}
+			}
 
-				for i := 1; i <= teams; i++ {
-					CreateChannel(s, m.GuildID, strconv.Itoa(i), args[1:])
-				}
+			for i := 1; i <= teams; i++ {
+				CreateChannel(s, m.GuildID, strconv.Itoa(i), args[1:])
 			}
 		}
 	}
