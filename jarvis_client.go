@@ -92,7 +92,7 @@ func setup() string {
 
 	ip = strings.Replace(ip, ".", "-", -1)
 
-	file, err := os.Open("KernalKraken_config.txt")
+	file, err := os.Open("SOHAIL_config.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
