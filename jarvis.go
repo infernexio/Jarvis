@@ -38,7 +38,7 @@ func CreateChannel(sess *discordgo.Session, guildID string, name string, ips []s
 
 		//save the channel id with the ip adress that should talk to it in a file
 		data := fmt.Sprintf("%s : %s\n", ip, channel.ID)
-		filename := "KernalKraken_config.txt"
+		filename := "SOHAIL_config.txt"
 		f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal(err)

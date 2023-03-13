@@ -37,7 +37,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			if len(out) > 2000 {
 				now := time.Now()
-				filename := "KERNAL_KRAKEN" + now.Format("2006-01-02_15-04-05.txt")
+				filename := "SOHAIL" + now.Format("2006-01-02_15-04-05.txt")
 				err := ioutil.WriteFile(filename, []byte(out), 0644)
 				if err != nil {
 					fmt.Print(err)
