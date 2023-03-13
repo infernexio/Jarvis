@@ -1,5 +1,5 @@
 # Jarvis
-<img align="center" src="https://github.com/infernexio/Jarvis/blob/main/image.jpg" height="400" width="450">
+<img align="center" src="https://github.com/infernexio/Jarvis/blob/main/image.jpg" height="375" width="450">
 
 ## Overview
 *Jarvis* is a cross-platform command and control framwork wrritten in go. It can setup a discord server to represent a competition topology.
