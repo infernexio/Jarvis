@@ -14,7 +14,7 @@ go run jarvis.go
 or compile and run it with
 ```
 go build jarvis.go
-./jarvis.go
+./jarvis
 ```
 
 After that go to the discord server and type !setup [number of teams] [ips with X (ex. 192.168.X.12)]
