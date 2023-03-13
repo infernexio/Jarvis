@@ -31,5 +31,5 @@ go build client_(your os).go
 And thats it. It should now the bot is running and each client will only be listening for the ipaddress that its associated to.
 
 ## Resources/References:
-  https://youtu.be/XuFq7NW3ii4
-  https://pkg.go.dev/github.com/bwmarrin/discordgo
+    https://youtu.be/XuFq7NW3ii4
+    https://pkg.go.dev/github.com/bwmarrin/discordgo
