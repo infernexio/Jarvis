@@ -79,6 +79,16 @@ func setup(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func testConnection(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+
+	if m.Content == "ping" && m.ChannelID == "1084889950950015109" {
+		s.ChannelMessageSend(m.ChannelID, "pong")
+	}
+}
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -90,15 +100,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sess.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-
-		if m.Content == "ping" {
-			s.ChannelMessageSend(m.ChannelID, "pong")
-		}
-	})
+	sess.AddHandler(testConnection)
 
 	sess.AddHandler(setup)
 
