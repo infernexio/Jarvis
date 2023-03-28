@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -27,7 +29,7 @@ func CreateChannel(sess *discordgo.Session, guildID string, name string, ips []s
 		ip := strings.Replace(ips[i], "X", name, -1)
 		ip = strings.Replace(ip, ".", "-", -1)
 		channel, err := sess.GuildChannelCreateComplex(guildID, discordgo.GuildChannelCreateData{
-			Name:     ip,
+			Name:     "💚 "+ip,
 			Type:     discordgo.ChannelTypeGuildText,
 			ParentID: category.ID,
 		})
@@ -79,13 +81,83 @@ func setup(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func testConnection(s *discordgo.Session, m *discordgo.MessageCreate) {
+func pingpong(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
 	if m.Content == "ping" && m.ChannelID == "1084889950950015109" {
 		s.ChannelMessageSend(m.ChannelID, "pong")
+	}
+}
+
+func testConnection(s *discordgo.Session) {
+	//opening the config file to get all the channel ids
+	filename := "SOHAIL_config.txt"
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+
+	// Read the file line by line and sending ping to each channel
+	for scanner.Scan() {
+		line := scanner.Text()
+		channelID := strings.Split(line, " : ")[1]
+
+		//seding ping to the channel
+		message, err := s.ChannelMessageSend(channelID, "ping")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		//waiting for 5 seconds to get the pong back
+		responseReceived := false
+
+		time.Sleep(time.Second)
+		response, err := s.ChannelMessages(message.ChannelID, 1, "", message.ID, "")
+		if err != nil {
+			fmt.Println("Error getting next message:", err)
+			return
+		}
+		if len(response) > 0 && response[0].Content == "pong" {
+			responseReceived = true
+		}
+
+		if responseReceived == true {
+			// Get the channel where the message was sent
+			channel, err := s.Channel(channelID)
+			if err != nil {
+				panic(err)
+			}
+
+			channelEdit := &discordgo.ChannelEdit{
+				Name: "💚 " + channel.Name[1:],
+			}
+
+			_, err = s.ChannelEdit(channelID, channelEdit)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// Get the channel where the message was sent
+			channel, err := s.Channel(channelID)
+			if err != nil {
+				panic(err)
+			}
+
+			channelEdit := &discordgo.ChannelEdit{
+				Name: "💔 " + channel.Name[1:],
+			}
+
+			// Set the channel name to "BAD"
+			_, err = s.ChannelEdit(channelID, channelEdit)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
 
@@ -100,7 +172,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sess.AddHandler(testConnection)
+	sess.AddHandler(pingpong)
 
 	sess.AddHandler(setup)
 
@@ -113,6 +185,18 @@ func main() {
 
 	defer sess.Close()
 	fmt.Print("Bot is running...")
+
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	testConnection(sess)
+
+	for {
+		select {
+		case <-ticker.C:
+			testConnection(sess)
+		}
+	}
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
