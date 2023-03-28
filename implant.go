@@ -18,9 +18,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
+//gets the id of the channel that the bot should listen to
 var channelID string = setup()
+var configFile string = "SOHAIL_config.txt"
 
+//execute the command that is sent to the bot through the channel
 func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -95,6 +97,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+//gets the local ip address of the machine used in the setup function
 func getLocalIP() (string, error) {
 	// Get a list of network interfaces on the machine
 	ifaces, err := net.Interfaces()
@@ -122,6 +125,7 @@ func getLocalIP() (string, error) {
 	return "", fmt.Errorf("no IP address found")
 }
 
+//gets the channel id that the bot should listen to from the config file and returns it
 func setup() string {
 	ip, err := getLocalIP()
 	if err != nil {
@@ -130,7 +134,7 @@ func setup() string {
 
 	ip = strings.Replace(ip, ".", "-", -1)
 
-	file, err := os.Open("SOHAIL_config.txt")
+	file, err := os.Open(configFile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -151,6 +155,7 @@ func setup() string {
 
 }
 
+//when it recieves ping in it's channel it responds with pong which is latter used to check if the bot is online
 func checkConnection(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -163,6 +168,7 @@ func checkConnection(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+//main function
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {

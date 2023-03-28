@@ -15,6 +15,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// create a Guild with the name of the team and text chanal with the ip adress of the team
 func CreateChannel(sess *discordgo.Session, guildID string, name string, ips []string) {
 	teamName := "Team " + name
 	category, err := sess.GuildChannelCreateComplex(guildID, discordgo.GuildChannelCreateData{
@@ -29,7 +30,7 @@ func CreateChannel(sess *discordgo.Session, guildID string, name string, ips []s
 		ip := strings.Replace(ips[i], "X", name, -1)
 		ip = strings.Replace(ip, ".", "-", -1)
 		channel, err := sess.GuildChannelCreateComplex(guildID, discordgo.GuildChannelCreateData{
-			Name:     "💚 "+ip,
+			Name:     "💚 " + ip,
 			Type:     discordgo.ChannelTypeGuildText,
 			ParentID: category.ID,
 		})
@@ -54,6 +55,7 @@ func CreateChannel(sess *discordgo.Session, guildID string, name string, ips []s
 	}
 }
 
+// sets up the discord server to have the channels for the teams
 func setup(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -81,6 +83,7 @@ func setup(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+// responds with pong when ping is received
 func pingpong(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -91,6 +94,7 @@ func pingpong(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+// goes through the config file and tests the connection to each channel and updates the channel name
 func testConnection(s *discordgo.Session) {
 	//opening the config file to get all the channel ids
 	filename := "SOHAIL_config.txt"
@@ -161,6 +165,7 @@ func testConnection(s *discordgo.Session) {
 	}
 }
 
+// main function
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
