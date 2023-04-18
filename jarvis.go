@@ -41,7 +41,7 @@ func CreateChannel(sess *discordgo.Session, guildID string, name string, ips []s
 
 		//save the channel id with the ip adress that should talk to it in a file
 		data := fmt.Sprintf("%s : %s\n", ip, channel.ID)
-		filename := "SOHAIL_config.txt"
+		filename := "KK_config.txt"
 		f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal(err)
@@ -97,7 +97,7 @@ func pingpong(s *discordgo.Session, m *discordgo.MessageCreate) {
 // goes through the config file and tests the connection to each channel and updates the channel name
 func testConnection(s *discordgo.Session) {
 	//opening the config file to get all the channel ids
-	filename := "SOHAIL_config.txt"
+	filename := "KK_config.txt"
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
