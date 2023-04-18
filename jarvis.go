@@ -19,7 +19,7 @@ import (
 )
 type PwnBoard struct {
 	IPs  string `json:"ip"`
-	Type string `json:"type"`
+	Application string `json:"application"`
 }
 
 //updates pwnboard with teams that it has access to
@@ -29,7 +29,7 @@ func updatepwnBoard(ip string) {
 	// Create the struct
 	data := PwnBoard{
 		IPs:  ip,
-		Type: "Jarvis",
+		Application: "Jarvis",
 	}
 
 	// Marshal the data
