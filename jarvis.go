@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -14,6 +17,37 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
+type PwnBoard struct {
+	IPs  string `json:"ip"`
+	Type string `json:"type"`
+}
+
+//updates pwnboard with teams that it has access to
+func updatepwnBoard(ip string) {
+	url := "http://pwnboard.win/pwn/boxaccess"
+
+	// Create the struct
+	data := PwnBoard{
+		IPs:  ip,
+		Type: "Jarvis",
+	}
+
+	// Marshal the data
+	sendit, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("\n[-] ERROR SENDING POST:", err)
+		return
+	}
+
+	// Send the post to pwnboard
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(sendit))
+	if err != nil {
+		fmt.Println("[-] ERROR SENDING POST:", err)
+		return
+	}
+
+	defer res.Body.Close()
+}
 
 // create a Guild with the name of the team and text chanal with the ip adress of the team
 func CreateChannel(sess *discordgo.Session, guildID string, name string, ips []string) {
@@ -140,6 +174,8 @@ func testConnection(s *discordgo.Session) {
 			channelEdit := &discordgo.ChannelEdit{
 				Name: "💚 " + channel.Name[1:],
 			}
+
+			updatepwnBoard(strings.Replace(channel.Name[1:], "X", ".", -1))
 
 			_, err = s.ChannelEdit(channelID, channelEdit)
 			if err != nil {
