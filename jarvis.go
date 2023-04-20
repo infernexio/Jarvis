@@ -112,9 +112,6 @@ func setup(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 	}
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "pong")
-	}
 }
 
 // responds with pong when ping is received
@@ -164,7 +161,7 @@ func testConnection(s *discordgo.Session) {
 			responseReceived = true
 		}
 
-		if responseReceived == true {
+		if responseReceived {
 			// Get the channel where the message was sent
 			channel, err := s.Channel(channelID)
 			if err != nil {
@@ -201,6 +198,24 @@ func testConnection(s *discordgo.Session) {
 	}
 }
 
+func startup(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if strings.Split(m.Content, " ")[0] == "!startup" {
+		s.ChannelMessageSend(m.ChannelID, "Starting up...")
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+		
+		testConnection(s)
+		
+		for {
+			select {
+			case <-ticker.C:
+				testConnection(s)
+			}
+		}
+	}
+}
+
 // main function
 func main() {
 	err := godotenv.Load(".env")
@@ -217,6 +232,8 @@ func main() {
 
 	sess.AddHandler(setup)
 
+	sess.AddHandler(startup)
+
 	sess.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
 	err = sess.Open()
@@ -227,17 +244,6 @@ func main() {
 	defer sess.Close()
 	fmt.Print("Bot is running...")
 
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	testConnection(sess)
-
-	for {
-		select {
-		case <-ticker.C:
-			testConnection(sess)
-		}
-	}
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
