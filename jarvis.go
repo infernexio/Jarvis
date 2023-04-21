@@ -17,18 +17,19 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
+
 type PwnBoard struct {
-	IPs  string `json:"ip"`
+	IPs         string `json:"ip"`
 	Application string `json:"application"`
 }
 
-//updates pwnboard with teams that it has access to
+// updates pwnboard with teams that it has access to
 func updatepwnBoard(ip string) {
 	url := "http://pwnboard.win/pwn/boxaccess"
 
 	// Create the struct
 	data := PwnBoard{
-		IPs:  ip,
+		IPs:         ip,
 		Application: "Jarvis",
 	}
 
@@ -204,9 +205,9 @@ func startup(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "Starting up...")
 		ticker := time.NewTicker(5 * time.Minute)
 		defer ticker.Stop()
-		
+
 		testConnection(s)
-		
+
 		for {
 			select {
 			case <-ticker.C:
@@ -243,7 +244,6 @@ func main() {
 
 	defer sess.Close()
 	fmt.Print("Bot is running...")
-
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

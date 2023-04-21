@@ -20,7 +20,7 @@ import (
 
 //gets the id of the channel that the bot should listen to
 var channelID string = setup()
-var configFile string = "KK_config.txt"
+var configFile string = "UB_hack_config.txt"
 
 //execute the command that is sent to the bot through the channel
 func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -44,7 +44,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 				if len(out) > 2000 {
 					now := time.Now()
-					filename := "KK_" + now.Format("2006-01-02_15-04-05.txt")
+					filename := "UB_hack_" + now.Format("2006-01-02_15-04-05.txt")
 					err := ioutil.WriteFile(filename, []byte(out), 0644)
 					if err != nil {
 						fmt.Print(err)
@@ -76,7 +76,7 @@ func execute(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 				if len(out) > 2000 {
 					now := time.Now()
-					filename := "KK" + now.Format("2006-01-02_15-04-05.txt")
+					filename := "UB_hack_" + now.Format("2006-01-02_15-04-05.txt")
 					err := ioutil.WriteFile(filename, []byte(out), 0644)
 					if err != nil {
 						fmt.Print(err)
